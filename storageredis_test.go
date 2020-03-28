@@ -1,7 +1,6 @@
 package storageredis
 
 import (
-	"os"
 	"path"
 	"testing"
 
@@ -12,11 +11,8 @@ import (
 const TestPrefix = "redistlstest"
 
 // these tests needs a running Redis server
-func setupRedisEnv(t *testing.T) *RedisStorage {
-	os.Setenv(EnvNameKeyPrefix, TestPrefix)
-	os.Setenv(EnvNameRedisDB, "9")
-
-	rd, err := NewRedisStorage()
+func setupRedis(t *testing.T) *RedisStorage {
+	rd, err := NewRedisStorage(&Options{KeyPrefix: TestPrefix, DB: 9})
 
 	// skip test if no redis storage
 	if err != nil {
@@ -34,14 +30,14 @@ func setupRedisEnv(t *testing.T) *RedisStorage {
 }
 
 func TestRedisStorage_Store(t *testing.T) {
-	rd := setupRedisEnv(t)
+	rd := setupRedis(t)
 
 	err := rd.Store(path.Join("acme", "example.com", "sites", "example.com", "example.com.crt"), []byte("crt data"))
 	assert.NoError(t, err)
 }
 
 func TestRedisStorage_Exists(t *testing.T) {
-	rd := setupRedisEnv(t)
+	rd := setupRedis(t)
 
 	key := path.Join("acme", "example.com", "sites", "example.com", "example.com.crt")
 
@@ -53,7 +49,7 @@ func TestRedisStorage_Exists(t *testing.T) {
 }
 
 func TestRedisStorage_Load(t *testing.T) {
-	rd := setupRedisEnv(t)
+	rd := setupRedis(t)
 
 	key := path.Join("acme", "example.com", "sites", "example.com", "example.com.crt")
 	content := []byte("crt data")
@@ -68,7 +64,7 @@ func TestRedisStorage_Load(t *testing.T) {
 }
 
 func TestRedisStorage_Delete(t *testing.T) {
-	rd := setupRedisEnv(t)
+	rd := setupRedis(t)
 
 	key := path.Join("acme", "example.com", "sites", "example.com", "example.com.crt")
 	content := []byte("crt data")
@@ -90,7 +86,7 @@ func TestRedisStorage_Delete(t *testing.T) {
 }
 
 func TestRedisStorage_Stat(t *testing.T) {
-	rd := setupRedisEnv(t)
+	rd := setupRedis(t)
 
 	key := path.Join("acme", "example.com", "sites", "example.com", "example.com.crt")
 	content := []byte("crt data")
@@ -105,7 +101,7 @@ func TestRedisStorage_Stat(t *testing.T) {
 }
 
 func TestRedisStorage_List(t *testing.T) {
-	rd := setupRedisEnv(t)
+	rd := setupRedis(t)
 
 	err := rd.Store(path.Join("acme", "example.com", "sites", "example.com", "example.com.crt"), []byte("crt"))
 	assert.NoError(t, err)
@@ -136,7 +132,7 @@ func TestRedisStorage_List(t *testing.T) {
 }
 
 func TestRedisStorage_ListNonRecursive(t *testing.T) {
-	rd := setupRedisEnv(t)
+	rd := setupRedis(t)
 
 	err := rd.Store(path.Join("acme", "example.com", "sites", "example.com", "example.com.crt"), []byte("crt"))
 	assert.NoError(t, err)
@@ -171,7 +167,7 @@ func TestRedisStorage_ListNonRecursive(t *testing.T) {
 }
 
 func TestRedisStorage_LockUnlock(t *testing.T) {
-	rd := setupRedisEnv(t)
+	rd := setupRedis(t)
 	lockKey := path.Join("acme", "example.com", "sites", "example.com", "lock")
 
 	err := rd.Lock(lockKey)
@@ -182,8 +178,8 @@ func TestRedisStorage_LockUnlock(t *testing.T) {
 }
 
 func TestRedisStorage_TwoLocks(t *testing.T) {
-	rd := setupRedisEnv(t)
-	rd2 := setupRedisEnv(t)
+	rd := setupRedis(t)
+	rd2 := setupRedis(t)
 	lockKey := path.Join("acme", "example.com", "sites", "example.com", "lock")
 
 	err := rd.Lock(lockKey)

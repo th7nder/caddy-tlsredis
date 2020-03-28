@@ -42,9 +42,14 @@ func (rd *RedisStorage) prefixKey(key string) string {
 	return path.Join(rd.Options.KeyPrefix, key)
 }
 
+// NewDefaultRedisStorage creates redis storage with default values
+func NewDefaultRedisStorage() (*RedisStorage, error) {
+	return NewRedisStorage(&Options{})
+}
+
 // NewRedisStorage build RedisStorage
-func NewRedisStorage() (*RedisStorage, error) {
-	opt := GetOptions()
+func NewRedisStorage(opt *Options) (*RedisStorage, error) {
+	opt = ParseOptions(opt)
 
 	redisClient := redis.NewClient(&redis.Options{
 		Addr:         opt.Host + ":" + opt.Port,
@@ -57,7 +62,7 @@ func NewRedisStorage() (*RedisStorage, error) {
 
 	if opt.TLSEnabled {
 		redisClient.Options().TLSConfig = &tls.Config{
-			InsecureSkipVerify: opt.TLSInsecure,
+			InsecureSkipVerify: !opt.TLSSecure,
 		}
 	}
 
