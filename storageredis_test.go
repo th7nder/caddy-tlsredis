@@ -1,11 +1,12 @@
 package storageredis
 
 import (
-	"github.com/mholt/certmagic"
-	"github.com/stretchr/testify/assert"
 	"os"
 	"path"
 	"testing"
+
+	"github.com/caddyserver/certmagic"
+	"github.com/stretchr/testify/assert"
 )
 
 const TestPrefix = "redistlstest"
@@ -15,7 +16,7 @@ func setupRedisEnv(t *testing.T) *RedisStorage {
 	os.Setenv(EnvNameKeyPrefix, TestPrefix)
 	os.Setenv(EnvNameRedisDB, "9")
 
-	rd, err := GetRedisStorage()
+	rd, err := NewRedisStorage()
 
 	// skip test if no redis storage
 	if err != nil {

@@ -8,9 +8,8 @@ import (
 	"time"
 
 	"github.com/bsm/redislock"
-	"github.com/caddyserver/caddy/caddytls"
-	"github.com/go-redis/redis"
-	"github.com/mholt/certmagic"
+	"github.com/caddyserver/certmagic"
+	"github.com/go-redis/redis/v7"
 )
 
 const (
@@ -38,17 +37,13 @@ type StorageData struct {
 	Modified time.Time `json:"modified"`
 }
 
-func init() {
-	caddytls.RegisterClusterPlugin("redis", constructRedisClusterPlugin)
-}
-
 // helper function to prefix key
 func (rd *RedisStorage) prefixKey(key string) string {
 	return path.Join(rd.Options.KeyPrefix, key)
 }
 
-// GetRedisStorage build RedisStorage
-func GetRedisStorage() (*RedisStorage, error) {
+// NewRedisStorage build RedisStorage
+func NewRedisStorage() (*RedisStorage, error) {
 	opt := GetOptions()
 
 	redisClient := redis.NewClient(&redis.Options{
@@ -291,8 +286,4 @@ func (rd RedisStorage) Unlock(key string) error {
 		}
 	}
 	return nil
-}
-
-func constructRedisClusterPlugin() (certmagic.Storage, error) {
-	return GetRedisStorage()
 }
